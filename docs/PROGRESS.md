@@ -57,3 +57,11 @@ Phase 1: core, companies/branches, module manifests/manager/gates/presets, scope
 Phase 2: immutable ledger, posting rules, account mapping, fiscal periods, FX/tax, reports/snapshots and all accounting invariants.
 
 Phases 3–10: money/parties, trade, stock/catalog, POS, people/payroll/attendance, growth/assets/manufacturing, intelligence/API/messaging, then security/performance/release hardening. Full detail remains in REQUIREMENTS.md sections 15–16. No release definition-of-done item is certified complete.
+
+## Continued foundation verification
+
+- Host-owned RequestCapture now enforces sampling/path exclusions, clears state for each request, redacts SQL values/bindings and hashes cache keys; real package job/analyzer persist results. Tests cover capture and zero-sample/exclusion behavior. Suite: 26 passed, 118 assertions; Pint and level-6 analysis pass.
+- Matching GD binary downloaded from Ubuntu registry and loaded successfully from /tmp without changing system configuration.
+- Browser login, Filament, Console, AI Hub Studio and Catalog Studio checked. Both layouts render independently with shared session auth.
+- Browser profiler review exposed a false duplicate pattern caused by redacting SQLite identifiers. Added a canonical SQL fingerprint to distinguish distinct statements while storing redacted SQL. No vendor changes.
+- Foundation contracts and safety boundary are ready for core module implementation. Per-business integrations and full document golden tests remain assigned to their owning phases.

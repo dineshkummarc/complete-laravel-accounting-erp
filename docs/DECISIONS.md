@@ -13,3 +13,5 @@
 | 2026-10-24 | Seed permissions only; install the initial owner interactively. | Avoid production mock records and default credentials. |
 | 2026-10-24 | Store and explicitly register PDF fonts under storage. | Vendor config contains developer-specific Windows paths; vendor files remain untouched. |
 | 2026-10-24 | Do not certify Phase 0 or begin Phase 1 before its complete acceptance gate. | User expressly requires phases to pass in order. |
+| 2026-10-24 | Replace unsafe profiler collection with host RequestCapture while retaining the package storage job and analyzer. | Enforce sampling/exclusions, remove SQL literals/bindings and hash cache keys without vendor edits. |
+| 2026-10-24 | Use a temporary extracted matching GD extension for host validation. | Verifies required capability without mutating system PHP configuration. |
