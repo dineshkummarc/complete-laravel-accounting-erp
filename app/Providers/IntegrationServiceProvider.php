@@ -12,7 +12,9 @@ use App\Integrations\Contracts;
 use App\Integrations\Pdf\PackagePdfRenderer;
 use App\Integrations\Speed\PackageDrutogotiAdapter;
 use App\Integrations\Speed\RequestCapture;
+use App\Integrations\Speed\SafeSuggestionEngine;
 use App\Models\User;
+use Drutogoti\Services\SuggestionEngine;
 use Illuminate\Cache\Events\CacheHit;
 use Illuminate\Cache\Events\CacheMissed;
 use Illuminate\Support\Facades\DB;
@@ -25,6 +27,7 @@ final class IntegrationServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->bind(SuggestionEngine::class, SafeSuggestionEngine::class);
         $this->app->bind(Contracts\DrutogotiAdapter::class, PackageDrutogotiAdapter::class);
         $this->app->bind(Contracts\AdminPanelAdapter::class, PackageAdminPanelAdapter::class);
         $this->app->bind(Contracts\PdfRenderer::class, PackagePdfRenderer::class);
@@ -40,6 +43,7 @@ final class IntegrationServiceProvider extends ServiceProvider
     public function boot(): void
     {
         setPermissionsTeamId(0);
+        Gate::define('platform.console', fn (User $user): bool => $user->hasPlatformPermission('platform.console'));
         foreach ([CacheHit::class => 'hit', CacheMissed::class => 'miss'] as $event => $label) {
             Event::listen($event, fn ($event) => app(RequestCapture::class)->cache($label, $event->key, $event->storeName));
         }

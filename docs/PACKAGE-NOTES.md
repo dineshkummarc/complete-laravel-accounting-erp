@@ -26,3 +26,10 @@ Inspected real composer manifests, README documentation, configuration, service 
 ## Boundaries not yet implemented
 
 Adapters are the foundation surfaces, not complete module integrations. Company gating, tenancy, AI budgets, full PII redaction of structured domain inputs, OCR/catalog review workflows, attendance ingestion, slugged domain models, PDF golden-file verification, and per-module fakes/tests remain future phase work. The AI adapter currently validates returned suggestions and redacts email/numeric identifiers; it cannot post, approve, or pay through its contract.
+
+## Follow-up fixes
+
+- Host RequestCapture now provides value-redacted query capture, hashed cache/cookie identifiers, sampling/exclusions and bounded telemetry pruning. It retains the real package storage job/analyzer without using the unsafe package watcher.
+- Package SuggestionEngine merged unrelated SQL issues by title and never reopened resolved issues. A tested host subclass now keys suggestions by a separate fingerprint mapping table and reopens recurrences. No vendor source was changed.
+- Filament Shield 3.9.10 installed. Its tenant resource uses a host Role subclass with the required company/team relationship, an owner-only policy, and company-scoped permission assignment.
+- Owen auditing is now active on Company, Branch and Role with a company resolver. The separate HMAC chain remains the business audit-integrity source.

@@ -41,6 +41,7 @@ jobs:
           DB_DATABASE: accounting_test
           DB_USERNAME: root
           DB_PASSWORD: testing
+      - run: php artisan modules:doctor
       - run: vendor/bin/pint --test
       - run: vendor/bin/phpstan analyse --no-progress --memory-limit=512M
       - run: composer audit --locked

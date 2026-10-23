@@ -40,7 +40,7 @@ it('shares one authenticated session across both independent panels', function (
     Permission::create(['name' => 'platform.console', 'guard_name' => 'web']);
     Permission::create(['name' => 'app.access', 'guard_name' => 'web']);
     $user->givePermissionTo(['platform.console', 'app.access']);
-    $this->actingAs($user)->get('/app')->assertOk();
+    $this->actingAs($user)->get('/app')->assertRedirect('/app/new');
     $this->get('/admin')->assertOk()->assertDontSee('$48,250.00')->assertSee('Platform Console');
     $this->get('/drutogoti')->assertOk();
     $this->get('/ai-hub')->assertOk();

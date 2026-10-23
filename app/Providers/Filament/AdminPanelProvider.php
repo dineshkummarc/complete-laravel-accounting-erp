@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Tenancy\RegisterCompany;
+use App\Http\Middleware\SelectFilamentBusiness;
+use App\Modules\Core\Models\Company;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -12,6 +16,7 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -29,6 +34,12 @@ class AdminPanelProvider extends PanelProvider
             ->id('app')
             ->path('app')
             ->login()
+            ->plugin(FilamentShieldPlugin::make())
+            ->brandName('Laravel Accounting')
+            ->renderHook(PanelsRenderHook::TOPBAR_END, fn () => view('filament.branch-switcher'))
+            ->tenant(Company::class, slugAttribute: 'slug')
+            ->tenantRegistration(RegisterCompany::class)
+            ->tenantMiddleware([SelectFilamentBusiness::class], isPersistent: true)
             ->colors([
                 'primary' => Color::Amber,
             ])

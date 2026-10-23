@@ -1,8 +1,24 @@
 # Delivery progress
 
-## Overall status — incomplete
+## Overall status — application still in development
 
-The workspace was empty on 2026-10-24. The supplied specification is preserved in REQUIREMENTS.md. Phase 0 is implemented in part but has **not passed its complete acceptance gate**. Phases 1–10 have not begun; none of the 24 business modules or accounting workflows is complete. This checkout is not a production accounting system.
+Foundation and core tenant workflows are implemented. All 24 module manifests are registered; these manifests are not complete business modules. The ledger and business workflows in phases 2–10 remain pending. This checkout is not yet a production accounting system.
+
+## Current core verification
+
+- Company onboarding, presets, headquarters creation, memberships and tenant-scoped Spatie/Shield roles.
+- Branch access, branch creation/switching, top-bar branch/language selectors and company settings.
+- Company/branch module state, dependency and core-disable guards, settings preservation, audited toggles and generic job/listener runtime gating.
+- Private scanned attachments, signed downloads, queued CSV imports with row errors and duplicate-job protection, formula-safe CSV export.
+- Immutable audit-event models, company-scoped master-data auditing via the installed package, HMAC audit chain and integrity verification screen.
+- Transactional per-branch document numbering and localization-pack defaults.
+- 74 Pest tests passing on SQLite; the earlier 73-test core suite also passed on isolated MariaDB. Pint and Larastan level 6 checked during development; final phase checks recorded below as they run.
+- `modules:doctor` validates all 24 manifest keys, dependency graph and English/Bangla names. Module runtime tests cover all 22 optional manifests; financial/business feature suites remain future work.
+- Browser checked onboarding, branch creation, module cards, team screen and top-bar selectors. Profiled modules/team screens each executed 22 queries in approximately 26/28 ms, with zero new slow-query or N+1 suggestions after query-fingerprint and permission-cache fixes. These are local core-screen measurements, not the release benchmark.
+
+## Remaining scope
+
+Accounting engine, contacts, banking, expenses, trade, stock, POS, people, manufacturing, assets/projects/growth, messaging, AI business workflows, API and release hardening remain incomplete. Account-mapping wizards and module-specific open-item guards must be completed as their owning domain modules are implemented. No claim is made that all 24 modules or the final definition of done is complete.
 
 ## Phase 0 implementation
 
@@ -65,3 +81,7 @@ Phases 3–10: money/parties, trade, stock/catalog, POS, people/payroll/attendan
 - Browser login, Filament, Console, AI Hub Studio and Catalog Studio checked. Both layouts render independently with shared session auth.
 - Browser profiler review exposed a false duplicate pattern caused by redacting SQLite identifiers. Added a canonical SQL fingerprint to distinguish distinct statements while storing redacted SQL. No vendor changes.
 - Foundation contracts and safety boundary are ready for core module implementation. Per-business integrations and full document golden tests remain assigned to their owning phases.
+
+## Core checkpoint gate
+
+77 tests / 490 assertions passed on SQLite and fresh isolated MariaDB. Pint passed, Larastan level 6 passed, manifest doctor passed and route caching passed. Company settings and audit timestamp-tampering coverage are included. Core screen proof is saved in docs/screenshots/core-branches.png. Ledger implementation is next; business workflows remain unimplemented.
