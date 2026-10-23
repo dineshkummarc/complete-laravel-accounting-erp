@@ -1,0 +1,44 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports: ['127.0.0.1:8000:8000']
+    volumes: ['.:/var/www/html']
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_DATABASE: accounting
+      DB_USERNAME: accounting
+      DB_PASSWORD: '${DB_PASSWORD:?Set DB_PASSWORD in .env}'
+      REDIS_HOST: redis
+      QUEUE_CONNECTION: redis
+      CACHE_STORE: redis
+    depends_on:
+      mysql: {condition: service_healthy}
+      redis: {condition: service_healthy}
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: accounting
+      MYSQL_USER: accounting
+      MYSQL_PASSWORD: '${DB_PASSWORD:?Set DB_PASSWORD in .env}'
+      MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}'
+    volumes: ['mysql-data:/var/lib/mysql']
+    healthcheck:
+      test: ['CMD-SHELL', 'mysqladmin ping -h localhost -uaccounting -p"$$MYSQL_PASSWORD"']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  redis:
+    image: redis:7-alpine
+    command: ['redis-server', '--appendonly', 'yes']
+    volumes: ['redis-data:/data']
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+volumes:
+  mysql-data:
+  redis-data:

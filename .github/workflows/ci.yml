@@ -1,0 +1,47 @@
+name: Quality
+on: [push, pull_request]
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: accounting_test
+          MYSQL_ROOT_PASSWORD: testing
+        ports: ['3306:3306']
+        options: --health-cmd="mysqladmin ping -ptesting" --health-interval=10s --health-timeout=5s --health-retries=10
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, intl, gd, bcmath, sockets, redis, pdo_mysql, zip
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist
+      - run: cp .env.example .env && php artisan key:generate
+      - run: php artisan migrate:fresh --seed --force
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: accounting_test
+          DB_USERNAME: root
+          DB_PASSWORD: testing
+      - run: php artisan unicode-pdf:font:install --font=bengali
+      - run: php artisan unicode-pdf:font:install --font=arabic
+      - run: php artisan unicode-pdf:font:install --font=universal
+      - run: vendor/bin/pest
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: accounting_test
+          DB_USERNAME: root
+          DB_PASSWORD: testing
+      - run: vendor/bin/pint --test
+      - run: vendor/bin/phpstan analyse --no-progress --memory-limit=512M
+      - run: composer audit --locked
+      - run: php artisan route:cache && php artisan route:clear
