@@ -47,6 +47,11 @@ final class JournalEntryPolicy
         return $this->view($actor, $entry) && $entry->status === JournalStatus::Posted && app(LedgerAccess::class)->allows($actor, 'accounting.journal.reverse');
     }
 
+    public function attach(User $actor, JournalEntry $entry): bool
+    {
+        return $this->view($actor, $entry) && $this->create($actor);
+    }
+
     public function delete(User $actor, JournalEntry $entry): bool
     {
         return false;

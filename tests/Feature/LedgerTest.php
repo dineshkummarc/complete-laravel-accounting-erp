@@ -9,6 +9,7 @@ use App\Modules\Accounting\Actions\LockPeriod;
 use App\Modules\Accounting\Actions\PostJournal;
 use App\Modules\Accounting\Actions\RebuildBalances;
 use App\Modules\Accounting\Actions\ReverseJournal;
+use App\Modules\Accounting\Actions\SetAccountMapping;
 use App\Modules\Accounting\Actions\SubmitJournal;
 use App\Modules\Accounting\Actions\UpdateAccountingSettings;
 use App\Modules\Accounting\DTOs\JournalData;
@@ -19,6 +20,7 @@ use App\Modules\Accounting\Models\FiscalPeriod;
 use App\Modules\Accounting\Models\JournalEntry;
 use App\Modules\Accounting\Models\JournalLine;
 use App\Modules\Accounting\ValueObjects\Amount;
+use App\Modules\Core\Actions\AddAttachment;
 use App\Modules\Core\Actions\AddCompanyMember;
 use App\Modules\Core\Actions\CreateBranch;
 use App\Modules\Core\Services\BusinessContext;
@@ -27,7 +29,9 @@ use Brick\Math\BigDecimal;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -240,4 +244,46 @@ it('includes journals on both report date boundaries and stores date-only facts 
     expect($report->totals['debit'])->toBe('12.3456')->and($report->totals['credit'])->toBe('12.3456');
     $period = FiscalPeriod::query()->orderBy('starts_on')->firstOrFail();
     expect(DB::table('fiscal_periods')->where('id', $period->id)->value('starts_on'))->toBe($period->starts_on->toDateString());
+});
+
+it('attaches private scanned voucher evidence without changing posted facts', function () {
+    Storage::fake('local');
+    $entry = app(CreateJournal::class)->handle(auth()->user(), ledgerData($this->cash->id, $this->sales->id));
+    app(PostJournal::class)->handle(auth()->user(), $entry->id);
+    $file = UploadedFile::fake()->createWithContent('voucher.txt', 'Disposable voucher evidence');
+    $attachment = app(AddAttachment::class)->handle(auth()->user(), $entry->fresh(), $file);
+    expect($attachment->subject_type)->toBe(JournalEntry::class)->and($attachment->subject_id)->toBe($entry->id)->and($entry->fresh()->status)->toBe(JournalStatus::Posted);
+    expect(auth()->user()->can('view', $attachment))->toBeTrue();
+    Storage::disk('local')->assertExists($attachment->path);
+});
+
+it('rejects unsupported currencies and conversion overflow as validation before any journal write', function () {
+    $unsupported = new JournalData('2026-10-24', 'ZZZ', '1', 'Unknown currency', [new JournalLineData($this->cash->id, '1', '0'), new JournalLineData($this->sales->id, '0', '1')], 'manual', (string) Str::uuid());
+    expect(fn () => app(CreateJournal::class)->handle(auth()->user(), $unsupported))->toThrow(ValidationException::class);
+    $overflow = new JournalData('2026-10-24', 'USD', '2', 'Overflow', [new JournalLineData($this->cash->id, '9999999999999999.9999', '0'), new JournalLineData($this->sales->id, '0', '9999999999999999.9999')], 'manual', (string) Str::uuid());
+    expect(fn () => app(CreateJournal::class)->handle(auth()->user(), $overflow))->toThrow(ValidationException::class);
+    expect(JournalEntry::query()->count())->toBe(0);
+});
+
+it('denies voucher attachment downloads to branch members without ledger permission', function () {
+    Storage::fake('local');
+    $entry = app(CreateJournal::class)->handle(auth()->user(), ledgerData($this->cash->id, $this->sales->id));
+    $attachment = app(AddAttachment::class)->handle(auth()->user(), $entry, UploadedFile::fake()->createWithContent('voucher.txt', 'Evidence'));
+    $staff = User::factory()->create();
+    app(AddCompanyMember::class)->handle(auth()->user(), $staff->email, [$this->branchId]);
+    $this->actingAs($staff);
+    app(BusinessContext::class)->select($staff, $this->company->id, $this->branchId);
+    expect($staff->can('view', $attachment))->toBeFalse()->and($staff->can('attach', $entry))->toBeFalse();
+});
+
+it('honors branch account mapping overrides when filtering bank books', function () {
+    $bank = Account::query()->where('code', '1110')->firstOrFail();
+    $wallet = Account::query()->where('code', '1120')->firstOrFail();
+    app(SetAccountMapping::class)->handle(auth()->user(), 'bank', $wallet->id, true);
+    foreach ([$bank, $wallet] as $account) {
+        $entry = app(CreateJournal::class)->handle(auth()->user(), ledgerData($account->id, $this->sales->id, '1'));
+        app(PostJournal::class)->handle(auth()->user(), $entry->id);
+    }
+    $report = app(ReportRegistry::class)->get('bank-book')->query(auth()->user(), ['from' => '2026-10-24', 'to' => '2026-10-24']);
+    expect($report->rows)->toHaveCount(1)->and($report->rows[0]['account'])->toBe($wallet->name);
 });

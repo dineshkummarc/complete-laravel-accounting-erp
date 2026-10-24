@@ -6,8 +6,10 @@ namespace App\Modules\Accounting\Models;
 
 use App\Modules\Accounting\Enums\JournalStatus;
 use App\Modules\Accounting\Services\LedgerWriteGuard;
+use App\Modules\Core\Models\Attachment;
 use App\Modules\Core\Models\BusinessModel;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use LogicException;
 
 /** @property string|null $source_hash
@@ -27,6 +29,12 @@ final class JournalEntry extends BusinessModel
     public function lines(): HasMany
     {
         return $this->hasMany(JournalLine::class);
+    }
+
+    /** @return MorphMany<Attachment,$this> */
+    public function attachments(): MorphMany
+    {
+        return $this->morphMany(Attachment::class, 'subject');
     }
 
     /** @return LedgerBuilder<$this> */

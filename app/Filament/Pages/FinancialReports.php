@@ -65,6 +65,12 @@ final class FinancialReports extends Page
         return app(AccountChoices::class)->all();
     }
 
+    public function updatedReport(): void
+    {
+        $this->accountId = null;
+        $this->result = [];
+    }
+
     public function generate(): void
     {
         abort_unless(self::canAccess(), 403);

@@ -2,7 +2,7 @@
 
 **Status: foundation, core tenant workflows, and the first ledger/report workflows are implemented. The complete accounting/business application is still in development.**
 
-Laravel 12, Filament 3 at `/app`, an independent platform Console at `/admin`, shared session authentication and Spatie permissions, and all seven specified `imrandevbd` packages are installed with locked versions. Company onboarding, branch switching, memberships/roles, module toggles/presets, private attachments, CSV imports/exports and an audit viewer are available. The ledger supports manual drafts, posting, independent approval, reversals, period locks, mapping, exact FX snapshots/rounding, and balance snapshots. Financial report previews and CSV are available. Optional business-module workflows remain pending; the full accounting phase is not complete.
+Laravel 12, Filament 3 at `/app`, an independent platform Console at `/admin`, shared session authentication and Spatie permissions, and all seven specified `imrandevbd` packages are installed with locked versions. Company onboarding, branch switching, memberships/roles, module toggles/presets, private attachments, CSV imports/exports and an audit viewer are available. The ledger supports manual drafts, posting, independent approval, reversals, period locks, mapping, exact FX snapshots/rounding, and balance snapshots. Financial report previews and CSV, private voucher attachments, configurable tax groups, and an exact tax calculator are available. Optional business-module workflows remain pending; the full accounting phase is not complete.
 
 See [installation](docs/INSTALL.md), [delivery status](docs/PROGRESS.md), [package findings](docs/PACKAGE-NOTES.md), and the preserved [requirements](docs/REQUIREMENTS.md).
 

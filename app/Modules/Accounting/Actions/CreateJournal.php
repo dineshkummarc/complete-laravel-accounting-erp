@@ -20,6 +20,7 @@ use App\Modules\Core\Services\AuditTrail;
 use App\Modules\Core\Services\BusinessContext;
 use Brick\Math\BigDecimal;
 use Brick\Money\Currency;
+use Brick\Money\Exception\UnknownCurrencyException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -31,10 +32,22 @@ final class CreateJournal
         app(LedgerAccess::class)->authorize($actor, 'accounting.journal.create');
         Validator::make(['date' => $data->entryDate, 'currency' => $data->currency, 'rate' => $data->exchangeRate, 'narration' => $data->narration, 'source_type' => $data->sourceType, 'source_id' => $data->sourceId, 'version' => $data->version, 'lines' => $data->lines],
             ['date' => 'required|date_format:Y-m-d', 'currency' => 'required|string|size:3', 'rate' => 'required|regex:/^\d{1,10}(?:\.\d{1,10})?$/D', 'narration' => 'required|string|max:10000', 'source_type' => 'required|string|max:100', 'source_id' => 'required|string|max:100', 'version' => 'required|integer|min:1', 'lines' => 'required|array|min:2|max:500'])->validate();
-        Currency::of($data->currency);
+        try {
+            Currency::of($data->currency);
+        } catch (UnknownCurrencyException $exception) {
+            throw ValidationException::withMessages(['currency' => $exception->getMessage()]);
+        }
         $rate = BigDecimal::of($data->exchangeRate)->toScale(10);
         if (! $rate->isPositive()) {
             throw ValidationException::withMessages(['exchange_rate' => __('accounting.positive_rate')]);
+        }
+        try {
+            foreach ($data->lines as $line) {
+                (new Amount($line->debit))->base((string) $rate);
+                (new Amount($line->credit))->base((string) $rate);
+            }
+        } catch (\InvalidArgumentException $exception) {
+            throw ValidationException::withMessages(['lines' => $exception->getMessage()]);
         }
         $context = app(BusinessContext::class);
         $company = Company::query()->findOrFail($context->companyId);

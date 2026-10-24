@@ -26,10 +26,19 @@ The application remains in development. The core tenant platform and an initial 
 - Trial balance, income statement, balance sheet, ledger/day book, journal register, account statements, cash/bank books and branch comparison. Shared definitions, authorized branch scope, opening balances, snapshot/full-period plus partial-period line reading, CSV formula protection and limited previews.
 - Cash-flow currently provides opening/movement/closing cash reconciliation only; the required indirect activity classification remains pending. Consolidated currently combines authorized branches without automatic interbranch elimination.
 
+## Tax and voucher extension
+
+- Configurable tax rates, ordered groups and account mappings, with no assumed statutory percentages. Inclusive, exclusive, compound and withholding calculations use exact rational arithmetic and return rate and component facts for source documents.
+- Line/document rounding at a configured 0–4 decimal scale. Inclusive rounding residuals are allocated to the last included component so the input gross is preserved. Withholding uses the net base, reduces payable and cannot be inclusive or compound.
+- Rate/group creation and a non-posting calculator are available in English/Bangla. Browser creation and calculation were checked with disposable example settings; proof is in screenshots/accounting-tax-calculation.png.
+- Private scanned voucher attachments can be added to drafts or posted journals. Attachment downloads require ledger access in addition to branch membership; adding evidence does not mutate journal amounts or status.
+- Unsupported currency and conversion overflow return validation errors before any journal write.
+- Bank/cash book filters respect branch mapping overrides rather than including both default and overridden accounts.
+
 ## Verification
 
-- SQLite: 95 tests / 567 assertions passed after the date-boundary fix. Tests cover posting precision, imbalance rollback, source identity, immutability, approval, locks, reversals, rounding, rebuilds, report reconciliation and company/branch access.
-- Isolated MariaDB: 95 tests / 567 assertions passed, including approval, rounding and date-boundary regressions.
+- SQLite: 105 tests / 597 assertions passed, including ledger, tax, attachment authorization and bank-book mapping regressions. Tests cover posting precision, imbalance rollback, source identity, immutability, approval, locks, reversals, rounding, rebuilds, report reconciliation and company/branch access.
+- Isolated MariaDB: 105 tests / 597 assertions passed with the same ledger, tax, attachment and mapping regressions.
 - Pint and Larastan level 6 passed for this checkpoint. Route cache compilation passed.
 - Core screen proof: screenshots/core-branches.png. Accounting browser proof: screenshots/accounting-trial-balance.png. Screenshots show disposable verification data, not seeded production records.
 - Local PHP is 8.5; Composer targets PHP 8.3. PHP 8.3/MySQL 8 CI is configured but its execution has not been observed. Docker deployment remains unverified.
@@ -37,7 +46,7 @@ The application remains in development. The core tenant platform and an initial 
 
 ## Remaining accounting scope
 
-Draft editing, voucher attachment support, recurring journals, opening-balance wizard, cost-center management, tax calculations/groups/withholding, settlement and revaluation FX, year-end close, reconciliation/subledger controls, branch-specific approvals, mapping enable-wizard checks, complete template variants, fiscal-date mutation guards, queued large exports, XLSX/PDF reports, indirect cash flow and interbranch elimination remain unfinished. Report CSV currently materializes the result in memory; large export jobs are still required. The accounting phase is not signed off.
+Draft editing, recurring journals, opening-balance wizard, cost-center management, settlement and revaluation FX, year-end close, reconciliation/subledger controls, branch-specific approvals, mapping enable-wizard checks, complete template variants, fiscal-date mutation guards, queued large exports, XLSX/PDF reports, indirect cash flow and interbranch elimination remain unfinished. Report CSV currently materializes the result in memory; large export jobs are still required. The accounting phase is not signed off.
 
 ## Remaining business and release scope
 

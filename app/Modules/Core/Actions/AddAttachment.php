@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Core\Actions;
 
 use App\Models\User;
+use App\Modules\Accounting\Models\JournalEntry;
 use App\Modules\Core\Contracts\UploadScanner;
 use App\Modules\Core\Models\Attachment;
 use App\Modules\Core\Models\Branch;
@@ -18,11 +19,11 @@ use Throwable;
 
 final class AddAttachment
 {
-    public function handle(User $actor, Branch $subject, UploadedFile $file): Attachment
+    public function handle(User $actor, Branch|JournalEntry $subject, UploadedFile $file): Attachment
     {
-        Gate::forUser($actor)->authorize('update', $subject);
+        Gate::forUser($actor)->authorize($subject instanceof Branch ? 'update' : 'attach', $subject);
         $context = app(BusinessContext::class);
-        abort_unless($context->branchId === $subject->id, 403);
+        abort_unless($context->branchId === ($subject instanceof Branch ? $subject->id : $subject->branch_id), 403);
         app(UploadScanner::class)->scan($file);
         $path = $file->store('companies/'.$context->companyId.'/'.$context->branchId.'/attachments', 'local');
         if (! is_string($path)) {
@@ -30,7 +31,7 @@ final class AddAttachment
         }
         try {
             return DB::transaction(function () use ($path, $subject, $file, $actor, $context): Attachment {
-                $attachment = new Attachment(['subject_type' => Branch::class, 'subject_id' => $subject->id, 'disk' => 'local', 'path' => $path,
+                $attachment = new Attachment(['subject_type' => $subject::class, 'subject_id' => $subject->id, 'disk' => 'local', 'path' => $path,
                     'original_name' => basename($file->getClientOriginalName()), 'mime_type' => $file->getMimeType(), 'size' => $file->getSize(),
                     'sha256' => hash_file('sha256', $file->getRealPath())]);
                 $attachment->created_by = $actor->id;

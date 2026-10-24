@@ -1,7 +1,7 @@
 <x-filament-panels::page>
     <form wire:submit="generate" class="flex flex-wrap items-end gap-4">
-        <label>{{ __('reports.title') }}<select wire:model="report" class="block rounded-lg border-gray-300 dark:bg-gray-900">@foreach($this->options() as $key => $title)<option value="{{ $key }}">{{ $title }}</option>@endforeach</select></label>
-        <label>{{ __('reports.column_account') }}<select wire:model="accountId" class="block rounded-lg border-gray-300 dark:bg-gray-900"><option value="">{{ __('reports.all_accounts') }}</option>@foreach($this->accounts() as $id => $name)<option value="{{ $id }}">{{ $name }}</option>@endforeach</select></label>
+        <label>{{ __('reports.title') }}<select wire:model.live="report" class="block rounded-lg border-gray-300 dark:bg-gray-900">@foreach($this->options() as $key => $title)<option value="{{ $key }}">{{ $title }}</option>@endforeach</select></label>
+        @if(in_array($report, ['general-ledger', 'account-statement', 'cash-book', 'bank-book', 'day-book'], true))<label>{{ __('reports.column_account') }}<select wire:model="accountId" class="block rounded-lg border-gray-300 dark:bg-gray-900"><option value="">{{ __('reports.all_accounts') }}</option>@foreach($this->accounts() as $id => $name)<option value="{{ $id }}">{{ $name }}</option>@endforeach</select></label>@endif
         <label>{{ __('reports.from') }}<input type="date" wire:model="from" class="block rounded-lg border-gray-300 dark:bg-gray-900"></label>
         <label>{{ __('reports.to') }}<input type="date" wire:model="to" class="block rounded-lg border-gray-300 dark:bg-gray-900"></label>
         <x-filament::button type="submit">{{ __('reports.run') }}</x-filament::button>

@@ -10,10 +10,12 @@ use App\Modules\Accounting\Enums\JournalStatus;
 use App\Modules\Accounting\Models\JournalEntry;
 use App\Modules\Accounting\Services\AccountChoices;
 use App\Modules\Accounting\Services\LedgerAccess;
+use App\Modules\Core\Actions\AddAttachment;
 use App\Modules\Core\Models\Company;
 use App\Modules\Core\Services\BusinessContext;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -67,7 +69,8 @@ final class Journals extends Page implements HasTable
             TextColumn::make('narration')->label(__('accounting.narration'))->limit(60)->searchable(),
         ])->filters([SelectFilter::make('status')->label(__('accounting.status'))->options(collect(JournalStatus::cases())->mapWithKeys(fn (JournalStatus $status): array => [$status->value => $status->label()]))])
             ->actions([
-                TableAction::make('view')->label(__('accounting.view'))->modalContent(fn (JournalEntry $record) => view('filament.accounting.journal-details', ['entry' => $record->load('lines.account')]))->modalSubmitAction(false),
+                TableAction::make('view')->label(__('accounting.view'))->modalContent(fn (JournalEntry $record) => view('filament.accounting.journal-details', ['entry' => $record->load('lines.account', 'attachments')]))->modalSubmitAction(false),
+                TableAction::make('attach')->label(__('business.attach_file'))->visible(fn (JournalEntry $record): bool => auth()->user()->can('attach', $record))->form([FileUpload::make('file')->label(__('business.file'))->storeFiles(false)->required()->maxSize(10240)])->action(fn (JournalEntry $record, array $data) => app(AddAttachment::class)->handle(auth()->user(), $record, $data['file'])),
                 TableAction::make('submit')->label(__('accounting.submit'))->visible(fn (JournalEntry $record): bool => $record->status === JournalStatus::Draft && auth()->user()->can('update', $record))->action(fn (JournalEntry $record) => app(Actions\SubmitJournal::class)->handle(auth()->user(), $record->id)),
                 TableAction::make('approve')->label(__('accounting.approve'))->requiresConfirmation()->visible(fn (JournalEntry $record): bool => auth()->user()->can('approve', $record))->action(fn (JournalEntry $record) => app(Actions\ApproveJournal::class)->handle(auth()->user(), $record->id)),
                 TableAction::make('post')->label(__('accounting.post'))->requiresConfirmation()->visible(fn (JournalEntry $record): bool => auth()->user()->can('post', $record))->action(fn (JournalEntry $record) => app(Actions\PostJournal::class)->handle(auth()->user(), $record->id)),

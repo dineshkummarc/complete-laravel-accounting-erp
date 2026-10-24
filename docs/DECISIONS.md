@@ -26,3 +26,8 @@
 - A reversal awaiting independent approval does not mark its original reversed until the reversing entry posts. Original rows remain reportable facts; reports include both posted and reversed originals plus posted reversals.
 - Report preview limits do not change totals. Current CSV exports compute the full result in memory; queued large exports remain a release requirement.
 - Cash-flow reconciliation is provisional and is labelled in the result metadata. It must not be treated as the requested complete indirect cash-flow statement.
+
+
+## Tax calculation foundation
+
+Tax groups are ordered and company scoped. Compound rates apply to the net base plus prior non-withholding taxes; withholding applies to the net base and reduces payable. Inclusive rates are extracted using exact rational coefficients. At the configured rounding boundary, an inclusive residual is allocated to the last included tax component to preserve gross input. Rates and account IDs are returned with component amounts for immutable document snapshots. This calculator does not choose legal rates or file returns.

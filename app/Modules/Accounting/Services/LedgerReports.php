@@ -101,8 +101,13 @@ final class LedgerReports
 
                 $mapping = $key === 'cash-book' ? 'cash' : 'bank';
                 $context = app(BusinessContext::class);
-                $mapped = DB::table('account_mappings')->where('company_id', $context->companyId)->where('key', $mapping)->whereIn('branch_id', array_merge([0], $scope->branches))->pluck('account_id')->all();
-                $query->whereIn('journal_lines.account_id', $mapped);
+                $mapped = DB::table('account_mappings')->where('company_id', $context->companyId)->where('key', $mapping)->whereIn('branch_id', array_merge([0], $scope->branches))->pluck('account_id', 'branch_id')->all();
+                $query->where(function ($query) use ($mapped, $scope): void {
+                    foreach ($scope->branches as $branch) {
+                        $account = $mapped[$branch] ?? $mapped[0] ?? 0;
+                        $query->orWhere(fn ($q) => $q->where('journal_lines.branch_id', $branch)->where('journal_lines.account_id', $account));
+                    }
+                });
 
             }
             $running = [];
