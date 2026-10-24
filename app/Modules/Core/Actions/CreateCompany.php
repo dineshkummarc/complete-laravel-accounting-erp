@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Core\Actions;
 
 use App\Models\User;
+use App\Modules\Core\Events\CompanyCreated;
 use App\Modules\Core\Models\Branch;
 use App\Modules\Core\Models\Company;
 use App\Modules\Core\Modules\ModuleManager;
@@ -49,6 +50,7 @@ final class CreateCompany
                 $owner->forceFill(['current_company_id' => $company->id, 'current_branch_id' => $branch->id])->save();
             });
             app(SeedCompanyRoles::class)->handle($owner, $company->id);
+            event(new CompanyCreated($company->id, $owner->id));
             app(ModuleManager::class)->preset($owner, $company->id, $preset);
             app(AuditTrail::class)->record($company->id, null, $owner->id, 'company.created', Company::class, (string) $company->id, [], $values);
 

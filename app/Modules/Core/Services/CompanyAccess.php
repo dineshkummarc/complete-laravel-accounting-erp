@@ -24,6 +24,11 @@ final class CompanyAccess
         return $company !== null && $this->membership($actor, $company) === true;
     }
 
+    public function forget(int $user, int $company): void
+    {
+        unset($this->memberships[$company.':'.$user]);
+    }
+
     private function membership(User $actor, int $company): ?bool
     {
         $key = $company.':'.$actor->id;

@@ -3,9 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\User;
-use App\Modules\Core\Actions\CreateCompany;
 use App\Modules\Core\Models\Branch;
-use App\Modules\Core\Models\Company;
 use App\Modules\Core\Modules\ModuleManager;
 use App\Modules\Core\Modules\ModuleRegistry;
 use App\Modules\Core\Services\BusinessContext;
@@ -19,11 +17,6 @@ use Illuminate\Validation\ValidationException;
 
 uses(RefreshDatabase::class);
 
-function businessCompany(User $owner, string $name = 'বাংলা ব্যবসা'): Company
-{
-    return app(CreateCompany::class)->handle($owner, ['name' => $name, 'currency' => 'BDT', 'locale' => 'en', 'timezone' => 'Asia/Dhaka', 'localization_pack' => 'bd']);
-}
-
 beforeEach(function () {
     $this->owner = User::factory()->create();
     $this->company = businessCompany($this->owner);
@@ -35,7 +28,7 @@ it('creates an owner, headquarters, mandatory modules and chained audit event at
     expect($this->company->slug)->not->toBeEmpty();
     expect(Branch::query()->count())->toBe(1);
     expect(app(ModuleManager::class)->enabledKeys())->toBe(['core', 'accounting']);
-    expect(DB::table('audit_events')->count())->toBe(1);
+    expect(DB::table('audit_events')->where('action', 'company.created')->count())->toBe(1);
 });
 
 it('fails closed without a company context and isolates company master data', function () {

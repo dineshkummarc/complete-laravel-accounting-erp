@@ -8,6 +8,7 @@ use App\Modules\Core\Services\BusinessContext;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
 /**
@@ -22,6 +23,24 @@ abstract class BusinessModel extends Model
     protected $guarded = ['id', 'company_id', 'branch_id', 'created_by', 'updated_by'];
 
     protected static bool $branchScoped = false;
+
+    /** @return BelongsTo<Company,$this> */
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    /** Persist date-only casts without a time on every database driver. */
+    public function setAttribute($key, $value)
+    {
+        parent::setAttribute($key, $value);
+        $cast = $this->getCasts()[$key] ?? '';
+        if ($value !== null && in_array(explode(':', $cast)[0], ['date', 'immutable_date'], true)) {
+            $this->attributes[$key] = $this->asDate($value)->format('Y-m-d');
+        }
+
+        return $this;
+    }
 
     protected static function booted(): void
     {
@@ -51,7 +70,7 @@ abstract class BusinessModel extends Model
             if ($model->isDirty(['company_id', 'branch_id', 'uuid', 'created_by'])) {
                 throw new AuthorizationException('Record ownership is immutable.');
             }
-            $model->updated_by = auth()->id();
+            $model->updated_by = app(BusinessContext::class)->actorId ?? auth()->id();
         });
     }
 }

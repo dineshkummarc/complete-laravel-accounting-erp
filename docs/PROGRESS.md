@@ -1,87 +1,44 @@
 # Delivery progress
 
-## Overall status — application still in development
+## Status
 
-Foundation and core tenant workflows are implemented. All 24 module manifests are registered; these manifests are not complete business modules. The ledger and business workflows in phases 2–10 remain pending. This checkout is not yet a production accounting system.
+The application remains in development. The core tenant platform and an initial accounting engine are implemented. All 24 module manifests are registered; optional manifests do not constitute completed business workflows. No production release or completion of the master requirements is claimed.
 
-## Current core verification
+## Implemented foundation and core
 
-- Company onboarding, presets, headquarters creation, memberships and tenant-scoped Spatie/Shield roles.
-- Branch access, branch creation/switching, top-bar branch/language selectors and company settings.
-- Company/branch module state, dependency and core-disable guards, settings preservation, audited toggles and generic job/listener runtime gating.
-- Private scanned attachments, signed downloads, queued CSV imports with row errors and duplicate-job protection, formula-safe CSV export.
-- Immutable audit-event models, company-scoped master-data auditing via the installed package, HMAC audit chain and integrity verification screen.
-- Transactional per-branch document numbering and localization-pack defaults.
-- 74 Pest tests passing on SQLite; the earlier 73-test core suite also passed on isolated MariaDB. Pint and Larastan level 6 checked during development; final phase checks recorded below as they run.
-- `modules:doctor` validates all 24 manifest keys, dependency graph and English/Bangla names. Module runtime tests cover all 22 optional manifests; financial/business feature suites remain future work.
-- Browser checked onboarding, branch creation, module cards, team screen and top-bar selectors. Profiled modules/team screens each executed 22 queries in approximately 26/28 ms, with zero new slow-query or N+1 suggestions after query-fingerprint and permission-cache fixes. These are local core-screen measurements, not the release benchmark.
+- Laravel 12, Filament 3, independent Console, shared authentication, tenant-scoped roles and the seven locked required packages.
+- Company onboarding with headquarters, localization packs, presets, default chart and fiscal-year initialization; no fictional business transactions seeded.
+- Memberships, explicit staff branch access, branch switching, settings, English/Bangla labels and immutable company slugs.
+- Module dependencies, company/branch enable state, cache invalidation, nav/route/job guards, presets and audited toggles.
+- Transactional branch numbering, private scanned attachments and signed downloads, queued branch CSV imports with row errors and duplicate-job protection, formula-safe CSV exports.
+- Tenant-scoped package auditing and HMAC-chained audit events, integrity viewer, read/write policies and fail-closed company/branch scopes.
+- Privacy-filtered performance capture, package-backed storage/analyzer, fingerprint-based suggestion handling and bounded pruning. Package deviations are recorded in PACKAGE-NOTES.md; vendor files were not modified.
 
-## Remaining scope
+## Implemented accounting checkpoint
 
-Accounting engine, contacts, banking, expenses, trade, stock, POS, people, manufacturing, assets/projects/growth, messaging, AI business workflows, API and release hardening remain incomplete. Account-mapping wizards and module-specific open-item guards must be completed as their owning domain modules are implemented. No claim is made that all 24 modules or the final definition of done is complete.
+- Chart of accounts and mappings with company defaults and branch overrides. Four template keys are available; generic service omits stock accounts, while other templates currently share the broad default chart.
+- Monthly fiscal periods, overlap checks, create-year UI, reasoned lock/unlock and explicit authorized lock overrides.
+- Immutable posted journals and lines, transactional numbering, source/version fingerprints, idempotency, separate maker/checker approval and configurable company threshold.
+- Exact decimal arithmetic using Brick Math/Money, document/base amounts and exchange-rate snapshots. Bounded conversion rounding creates an explicit base-only rounding line. Reversals preserve original facts and post opposite linked entries in an open period.
+- Transactional account-balance snapshots, exact rebuild action and `accounting:rebuild-balances {company} {branch} --actor={user}` command.
+- PostingRule contract and guarded PostDocumentToLedger action; domain rules are added with their owning business workflows.
+- Filament chart, journals, accounting settings and report screens. Browser verified draft creation, posting and a balanced trial balance in a disposable local verification company.
+- Trial balance, income statement, balance sheet, ledger/day book, journal register, account statements, cash/bank books and branch comparison. Shared definitions, authorized branch scope, opening balances, snapshot/full-period plus partial-period line reading, CSV formula protection and limited previews.
+- Cash-flow currently provides opening/movement/closing cash reconciliation only; the required indirect activity classification remains pending. Consolidated currently combines authorized branches without automatic interbranch elimination.
 
-## Phase 0 implementation
+## Verification
 
-- Laravel 12.70.1, Filament 3.3.57, and all seven requested packages installed with composer.lock; Composer resolves for PHP 8.3.
-- Separate Filament `/app` and package Console `/admin`, one users table/web guard, shared login, application-enforced permission checks.
-- Six integration contracts with production bindings and explicit test doubles; slug integration verified against real package generation.
-- Protected AI studios; disabled unsafe public package API/device ingress and automatic AI navigation until tenant-aware module gates exist.
-- Console host-view override removes package sample financial data; actual user/failed-job counts only. Host-owned profiler summary reads real package tables.
-- AI suggestions use structured output, validation and basic email/numeric identifier redaction. Contract exposes no posting/payment/approval operations.
-- Permission-only seeding, interactive strong-password owner installer, foundation health command, explicit Noto font registrations, English/Bangla host-view labels.
-- PHP 8.3 container definition, MySQL/Redis Compose services, CI configuration, operational instructions and package discrepancies recorded.
+- SQLite: 95 tests / 567 assertions passed after the date-boundary fix. Tests cover posting precision, imbalance rollback, source identity, immutability, approval, locks, reversals, rounding, rebuilds, report reconciliation and company/branch access.
+- Isolated MariaDB: 95 tests / 567 assertions passed, including approval, rounding and date-boundary regressions.
+- Pint and Larastan level 6 passed for this checkpoint. Route cache compilation passed.
+- Core screen proof: screenshots/core-branches.png. Accounting browser proof: screenshots/accounting-trial-balance.png. Screenshots show disposable verification data, not seeded production records.
+- Local PHP is 8.5; Composer targets PHP 8.3. PHP 8.3/MySQL 8 CI is configured but its execution has not been observed. Docker deployment remains unverified.
+- Native PDF generation and font installation were tested earlier; multilingual document shaping/golden checks remain open.
 
-## Verification observed
+## Remaining accounting scope
 
-| Check | Result |
-| --- | --- |
-| Pest, SQLite | **24 passed**, 109 assertions |
-| Fresh migrations and seed, SQLite | Passed, all 22 migrations |
-| Fresh migrations and seed, isolated MariaDB 11.8.6 | Passed, all 22 migrations |
-| Pest, isolated MariaDB | Earlier 19-test suite passed, 103 assertions; five added tests subsequently verified on SQLite |
-| Pint | Passed |
-| Larastan level 6 | Passed using serial `--debug` because sandbox blocks its parallel TCP listener |
-| Composer validate --strict | Passed |
-| Composer audit --locked | No security advisories |
-| Route cache compilation and clear | Passed |
-| Route method/domain/URI uniqueness | Covered by passing test |
-| Shared-session Console/Filament HTTP render | Passed; unauthorized users and guests denied |
-| Native PDF adapter | Real PDF header and package-fake recording verified |
-| Bangla, Arabic and CJK slug generation | Passed |
-| Font installation | Noto Sans, Noto Sans Bengali and Noto Sans Arabic downloaded into storage |
-| app:doctor | Foundation checks passed |
-| app:doctor --production on host defaults | Correctly fails: GD missing; default DB is SQLite; Redis network access blocked inside sandbox |
-| Redis outside sandbox | PONG |
-| Exact PHP 8.3/MySQL 8 CI | Configured; execution not observed |
+Draft editing, voucher attachment support, recurring journals, opening-balance wizard, cost-center management, tax calculations/groups/withholding, settlement and revaluation FX, year-end close, reconciliation/subledger controls, branch-specific approvals, mapping enable-wizard checks, complete template variants, fiscal-date mutation guards, queued large exports, XLSX/PDF reports, indirect cash flow and interbranch elimination remain unfinished. Report CSV currently materializes the result in memory; large export jobs are still required. The accounting phase is not signed off.
 
-Temporary verification MariaDB was isolated from existing databases and shut down after verification. No existing database credentials or data were used.
+## Remaining business and release scope
 
-## Phase 0 gate still open
-
-1. Host GD extension is missing; target PHP 8.3 container build is not verified.
-2. Drutogoti lacks advertised dashboard, sampling/path exclusion, cache/cookie capture and retention hooks. Minimal host summary works, but capture remains off pending a privacy-safe tested workaround. No performance/N+1 acceptance claim is made.
-3. Browser-level panel visual coexistence, click-through and profiler review have not been performed. HTTP/session coexistence is proven only.
-4. Adapters expose foundation operations; full per-company settings, AI budgets/redaction and module gates depend on later domain implementation. Protected studios are reachable but business integrations are not complete.
-5. No screenshot/golden-file proof of multilingual document shaping yet. Font installation and native PDF generation do not prove every document renders correctly.
-
-Per the supplied phase rule, do not mark Phase 0 complete or progress to Phase 1 until its remaining gate requirements pass. A foundation checkpoint commit is not a completed-phase commit.
-
-## Remaining delivery
-
-Phase 1: core, companies/branches, module manifests/manager/gates/presets, scopes, numbering, attachments/audit/import infrastructure.
-
-Phase 2: immutable ledger, posting rules, account mapping, fiscal periods, FX/tax, reports/snapshots and all accounting invariants.
-
-Phases 3–10: money/parties, trade, stock/catalog, POS, people/payroll/attendance, growth/assets/manufacturing, intelligence/API/messaging, then security/performance/release hardening. Full detail remains in REQUIREMENTS.md sections 15–16. No release definition-of-done item is certified complete.
-
-## Continued foundation verification
-
-- Host-owned RequestCapture now enforces sampling/path exclusions, clears state for each request, redacts SQL values/bindings and hashes cache keys; real package job/analyzer persist results. Tests cover capture and zero-sample/exclusion behavior. Suite: 26 passed, 118 assertions; Pint and level-6 analysis pass.
-- Matching GD binary downloaded from Ubuntu registry and loaded successfully from /tmp without changing system configuration.
-- Browser login, Filament, Console, AI Hub Studio and Catalog Studio checked. Both layouts render independently with shared session auth.
-- Browser profiler review exposed a false duplicate pattern caused by redacting SQLite identifiers. Added a canonical SQL fingerprint to distinguish distinct statements while storing redacted SQL. No vendor changes.
-- Foundation contracts and safety boundary are ready for core module implementation. Per-business integrations and full document golden tests remain assigned to their owning phases.
-
-## Core checkpoint gate
-
-77 tests / 490 assertions passed on SQLite and fresh isolated MariaDB. Pint passed, Larastan level 6 passed, manifest doctor passed and route caching passed. Company settings and audit timestamp-tampering coverage are included. Core screen proof is saved in docs/screenshots/core-branches.png. Ledger implementation is next; business workflows remain unimplemented.
+Contacts, banking, expenses, tax returns, sales, purchases, inventory, POS, HR, attendance, payroll, manufacturing, assets, projects, growth, messaging, AI business integrations, public API and final security/performance/deployment acceptance remain incomplete. See REQUIREMENTS.md for the complete workflow and acceptance list. Account IDs on contacts/cost centers and business posting rules will be validated against their owning domain records as those modules are implemented.

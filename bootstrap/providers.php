@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Providers\AccountingServiceProvider;
 use App\Providers\AppServiceProvider;
 use App\Providers\BusinessServiceProvider;
 use App\Providers\Filament\AdminPanelProvider;
@@ -11,5 +12,6 @@ return [
     AppServiceProvider::class,
     IntegrationServiceProvider::class,
     BusinessServiceProvider::class,
+    AccountingServiceProvider::class,
     AdminPanelProvider::class,
 ];

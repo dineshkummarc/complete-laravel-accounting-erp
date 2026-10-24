@@ -14,6 +14,7 @@ use ImranDev\UniversalSlug\Attributes\Slug;
 use ImranDev\UniversalSlug\Traits\HasUniversalSlug;
 use OwenIt\Auditing\Auditable;
 
+/** @property string|null $accounting_settings */
 #[Slug(from: 'name', to: 'slug', immutable: true)]
 final class Company extends Model implements \OwenIt\Auditing\Contracts\Auditable
 {
