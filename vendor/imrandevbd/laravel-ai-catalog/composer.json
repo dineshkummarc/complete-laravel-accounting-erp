@@ -1,0 +1,81 @@
+{
+    "name": "imrandevbd/laravel-ai-catalog",
+    "description": "AI-powered Laravel product catalog — generate listings from photo, keyword, URL, voice, datasheet, or bulk file, with multi-language, image intelligence, review workflow, JSON-LD, agentic shopping feeds (llms.txt), Digital Product Passport (DPP), social commerce video scripts, and returns reduction.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "laravel",
+        "ai",
+        "catalog",
+        "ecommerce",
+        "product",
+        "seo",
+        "llms-txt",
+        "dpp",
+        "digital-product-passport",
+        "social-commerce",
+        "tiktok-shop",
+        "spatial-commerce",
+        "filament",
+        "multi-language",
+        "openai",
+        "gemini",
+        "claude",
+        "data-entry"
+    ],
+    "authors": [
+        {
+            "name": "Imran Dev BD",
+            "email": "me@imrandev.bd",
+            "homepage": "https://imrandev.bd",
+            "role": "Developer"
+        }
+    ],
+    "homepage": "https://github.com/imranbru99/laravel-ai-catalog",
+    "support": {
+        "issues": "https://github.com/imranbru99/laravel-ai-catalog/issues",
+        "source": "https://github.com/imranbru99/laravel-ai-catalog"
+    },
+    "require": {
+        "php": "^8.2",
+        "illuminate/console": "^10.0|^11.0|^12.0|^13.0",
+        "illuminate/database": "^10.0|^11.0|^12.0|^13.0",
+        "illuminate/http": "^10.0|^11.0|^12.0|^13.0",
+        "illuminate/queue": "^10.0|^11.0|^12.0|^13.0",
+        "illuminate/routing": "^10.0|^11.0|^12.0|^13.0",
+        "illuminate/support": "^10.0|^11.0|^12.0|^13.0",
+        "illuminate/validation": "^10.0|^11.0|^12.0|^13.0",
+        "illuminate/view": "^10.0|^11.0|^12.0|^13.0",
+        "imrandevbd/laravel-ai-hub": "^1.6"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^8.0|^9.0|^10.0",
+        "phpunit/phpunit": "^10.0|^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "ImranDevBd\\AiCatalog\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ImranDevBd\\AiCatalog\\Tests\\": "tests/"
+        }
+    },
+    "suggest": {
+        "filament/filament": "Required to use the Generate with AI action and review resource",
+        "livewire/livewire": "Required to use the non-Filament Livewire generate component"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "ImranDevBd\\AiCatalog\\AiCatalogServiceProvider"
+            ],
+            "aliases": {
+                "AiCatalog": "ImranDevBd\\AiCatalog\\Facades\\AiCatalog"
+            }
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
